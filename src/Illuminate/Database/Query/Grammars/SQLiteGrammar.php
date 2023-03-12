@@ -147,6 +147,29 @@ class SQLiteGrammar extends Grammar
     }
 
     /**
+     * Prepare the binding for a "JSON contains" statement.
+     *
+     * @param  mixed  $binding
+     * @return string
+     */
+    public function prepareBindingForJsonContains($binding)
+    {
+        return $binding;
+    }
+
+    /**
+     * Compile a "JSON contains" statement into SQL.
+     *
+     * @param  string  $column
+     * @param  string  $value
+     * @return string
+     */
+    protected function compileJsonContains($column, $value)
+    {
+        return $this->wrap($column).' = '.$value;
+    }
+
+    /**
      * Compile a "JSON contains key" statement into SQL.
      *
      * @param  string  $column
