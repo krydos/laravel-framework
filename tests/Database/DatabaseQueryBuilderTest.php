@@ -5139,10 +5139,21 @@ SQL;
 
     public function testWhereJsonContainsSqlite()
     {
-        $this->expectException(RuntimeException::class);
+        $builder = $this->getPostgresBuilder();
+        $builder->select('*')->from('users')->whereJsonContains('options', ['en']);
+        $this->assertSame('select * from "users" where json_extract("options") = ?', $builder->toSql());
+        $this->assertEquals(['["en"]'], $builder->getBindings());
 
-        $builder = $this->getSQLiteBuilder();
-        $builder->select('*')->from('users')->whereJsonContains('options->languages', ['en'])->toSql();
+        $builder = $this->getPostgresBuilder();
+        $builder->select('*')->from('users')->whereJsonContains('users.options->languages', ['en']);
+        $this->assertSame('select * from "users" where json_extract("users.options", "$.languages") = ?', $builder->toSql());
+        $this->assertEquals(['["en"]'], $builder->getBindings());
+
+        $builder = $this->getPostgresBuilder();
+        $builder->select('*')->from('users')->where('id', '=', 1)->orWhereJsonContains('options->languages', new Raw("'[\"en\"]'"));
+        $this->assertSame('select * from "users" where "id" = ? or json_extract("options", "$.languages") = \'["en"]\'', $builder->toSql());
+        $this->assertEquals([1], $builder->getBindings());
+        $this->expectException(RuntimeException::class);
     }
 
     public function testWhereJsonContainsSqlServer()
